@@ -5,12 +5,18 @@ import { JSONFileReader } from "./utils/fileReader.js";
 import { Validator } from "./utils/validator.js";
 import { Logger } from "./ui/logger.js";
 import { TransportationProblemSolver } from "./core/solver.js";
+import { DifferentialRentMethod } from "./algorithms/differentialRentMethod.js";
 import {
   DOM_IDS,
   DEFAULT_COSTS,
   DEFAULT_SUPPLIES,
   DEFAULT_DEMANDS,
 } from "./constants.js";
+import {
+  SOLVER_METHODS,
+  DEFAULT_METHOD_ID,
+  METHOD_IDS,
+} from "./core/methodDefinitions.js";
 
 let inputHandler;
 let defaultCosts = DEFAULT_COSTS.map((row) => [...row]);
@@ -35,6 +41,7 @@ function init() {
   document.head.appendChild(script);
 
   inputHandler = new InputHandler();
+  initializeMethodSelect();
 
   // Render the initial matrix
   inputHandler.generateMatrixUI(defaultCosts, defaultSupplies, defaultDemands);
@@ -114,6 +121,31 @@ function setupEventListeners() {
   }
 }
 
+function initializeMethodSelect() {
+  const methodSelect = document.getElementById(DOM_IDS.METHOD_SELECT);
+  const descriptionEl = document.getElementById(DOM_IDS.METHOD_DESCRIPTION);
+  if (!methodSelect) return;
+
+  methodSelect.innerHTML = SOLVER_METHODS.map(
+    (method) => `<option value="${method.id}">${method.label}</option>`
+  ).join("");
+
+  methodSelect.value = DEFAULT_METHOD_ID;
+  updateMethodDescription(DEFAULT_METHOD_ID, descriptionEl);
+
+  methodSelect.addEventListener("change", (event) => {
+    const target = event.target;
+    const methodId = target.value;
+    updateMethodDescription(methodId, descriptionEl);
+  });
+}
+
+function updateMethodDescription(methodId, descriptionEl) {
+  if (!descriptionEl) return;
+  const method = SOLVER_METHODS.find((item) => item.id === methodId);
+  descriptionEl.textContent = method?.description ?? "";
+}
+
 async function handleFileUpload(event) {
   const target = event.target;
   const file = target.files?.[0];
@@ -168,13 +200,30 @@ function handleSolve() {
   const logger = new Logger(outputContainer);
 
   try {
-    const solver = new TransportationProblemSolver(
-      inputData.costs,
-      inputData.supplies,
-      inputData.demands,
-      logger
-    );
-    solver.solve();
+    const methodSelect = document.getElementById(DOM_IDS.METHOD_SELECT);
+    const selectedMethod = methodSelect
+      ? methodSelect.value
+      : DEFAULT_METHOD_ID;
+
+    if (selectedMethod === METHOD_IDS.POTENTIAL) {
+      const solver = new TransportationProblemSolver(
+        inputData.costs,
+        inputData.supplies,
+        inputData.demands,
+        logger
+      );
+      solver.solve();
+    } else if (selectedMethod === METHOD_IDS.DIFFERENTIAL_RENT) {
+      const differentialRent = new DifferentialRentMethod(
+        inputData.costs,
+        inputData.supplies,
+        inputData.demands,
+        logger
+      );
+      differentialRent.solve();
+    } else {
+      throw new Error("Unknown solving method selected.");
+    }
   } catch (e) {
     console.error(e);
     logger.logError(
@@ -190,4 +239,3 @@ if (document.readyState === "loading") {
 } else {
   init();
 }
-

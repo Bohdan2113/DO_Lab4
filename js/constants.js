@@ -17,7 +17,7 @@ export const DEFAULT_COSTS = [
   [4, 9, 1, 3],
   [2, 5, 5, 6],
   [2, 5, 10, 4],
-  [3, 7, 2, 6]
+  [3, 7, 2, 6],
 ];
 
 export const DEFAULT_SUPPLIES = [43, 20, 30, 32];
@@ -28,6 +28,8 @@ export const DOM_IDS = {
   MATRIX_CONTAINER: "matrix-container",
   OUTPUT_CONTAINER: "output-container",
   SOLVE_BUTTON: "solve-button",
+  METHOD_SELECT: "method-select",
+  METHOD_DESCRIPTION: "method-description",
   JSON_UPLOAD: "json-upload",
   FILE_STATUS: "file-status",
   MESSAGE_BOX: "message-box",
@@ -37,4 +39,3 @@ export const DOM_IDS = {
   ADD_CONSUMER: "add-consumer",
   TOTAL_BALANCE: "total-balance",
 };
-
